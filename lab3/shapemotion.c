@@ -17,7 +17,7 @@
 #define GREEN_LED BIT6
 
 
-AbRect rect10 = {abRectGetBounds, abRectCheck, {20,5}}; /**< 20x5 rectangle */
+AbRect paddle = {abRectGetBounds, abRectCheck, {20,5}}; /**< 20x5 rectangle */
 AbRArrow rightArrow = {abRArrowGetBounds, abRArrowCheck, 30};
 
 AbRectOutline fieldOutline = {	/* playing field */
@@ -34,9 +34,9 @@ Layer layer4 = {
 };
   
 
-Layer layer3 = {		/**< Layer with an orange circle */
+Layer layer3 = {		/**< Layer with a black circle */
   (AbShape *)&circle8,
-  {(screenWidth/2)+10, (screenHeight/2)+5}, /**< bit below & right of center */
+  {(screenWidth/2), (screenHeight/2)}, /* center */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLACK,
   &layer4,
@@ -51,17 +51,17 @@ Layer fieldLayer = {		/* playing field as a layer */
   &layer3
 };
 
-Layer layer1 = {		/**< Layer with a red square */
-  (AbShape *)&rect10,
-  {screenWidth/2, screenHeight-10}, /**< center */
+Layer layer1 = {		/**< Layer with a red paddle */
+  (AbShape *)&paddle,
+  {screenWidth/2, screenHeight-10}, /* buttom (player 1) */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_RED,
   &fieldLayer,
 };
 
-Layer layer0 = {		/**< Layer with an orange circle */
-  (AbShape *)&rect10,
-  {(screenWidth/2)+10, 10}, /**< bit below & right of center */
+Layer layer0 = {		/**< Layer with a blue paddle */
+  (AbShape *)&paddle,
+  {(screenWidth/2)+10, 10}, /* top (player 2) */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLUE,
   &layer1,
@@ -79,8 +79,8 @@ typedef struct MovLayer_s {
 
 /* initial value of {0,0} will be overwritten */
 MovLayer ml3 = { &layer3, {3,3}, 0 }; /**< not all layers move */
-MovLayer ml1 = { &layer1, {2,0}, &ml3 }; //Red player bar 
-MovLayer ml0 = { &layer0, {2,0}, &ml1 }; //Blue player bar
+MovLayer ml1 = { &layer1, {3,0}, &ml3 }; //Red player bar 
+MovLayer ml0 = { &layer0, {3,0}, &ml1 }; //Blue player bar
 
 void movLayerDraw(MovLayer *movLayers, Layer *layers)
 {
@@ -147,12 +147,24 @@ void mlAdvance(MovLayer *ml, Region *fence)
   } /**< for ml */
 }
 
+char p1Stats[6] = "P1:0";
+char p2Stats[6] = "P2:0";
+u_int scoreAt = 3;
+char p1Score = 0;
+char p2Score = 0;
+char playGame = 0;
+char gameOver = 0;
 
 u_int bgColor = COLOR_GREEN;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
 
 Region fieldFence;		/**< fence around playing field  */
+Region fencePaddle1;
+Region fencePaddle2;
 
+void printScore(char *scoreBoard, char width){
+  drawString5x7(width,3, scoreBoard, COLOR_BLACK, COLOR_YELLOW);
+}
 
 /** Initializes everything, enables interrupts and green LED, 
  *  and handles the rendering for the screen
