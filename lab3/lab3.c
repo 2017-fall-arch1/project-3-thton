@@ -12,6 +12,8 @@
 #include <p2switches.h>
 #include <shape.h>
 #include <abCircle.h>
+#include "music.h"
+#include "buzzer.h"
 
 #define GREEN_LED BIT6
 
@@ -217,11 +219,13 @@ char game(MovLayer *ml, MovLayer *p1, MovLayer *p2, Region *fenceP1,Region *fenc
   /* collision between ball and horizontal wall (scoring) */
   if(shapeBoundary.topLeft.axes[1] < fence->topLeft.axes[1]){
     updateScore(0);
+    //buzzer_set_note(1);
     return 1;
   }
 
   if(shapeBoundary.botRight.axes[1] > fence->botRight.axes[1]){
     updateScore(1);
+    //buzzer_set_note(1);
     return 1;
   }
 
@@ -287,7 +291,7 @@ void wdt_c_handler()
 
       lcd_init();
       p2sw_init(15);
-      //buzzer_init();
+      buzzer_init();
       layerDraw(&layer0);
 
       drawString5x7(50,2, "Score", COLOR_BLACK, COLOR_GREEN);
@@ -296,13 +300,13 @@ void wdt_c_handler()
     }
   }
 
-  //if(!gameOver)
-    //song(sound);
+  if(!gameOver)
+    song(sound);
     //drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
 
-  /*if(++sound > 225)
+  if(++sound > 225)
     sound = 0;
-  */
+  
   if(count++ == 15){
     layerGetBounds(&layer1, &fencePaddle1);
     layerGetBounds(&layer0, &fencePaddle2);
@@ -338,12 +342,12 @@ void wdt_c_handler()
 
       layerDraw(&layer0);
       and_sr(~8);
-      //buzzer_set_note(1);
+      buzzer_set_note(1);
 
       drawString5x7(screenWidth/2-25,50,"GAME OVER!",COLOR_RED,COLOR_GOLD);    //game over message
       drawString5x7(screenWidth/2-20,100,"WINNER",COLOR_BLACK,COLOR_GOLD);
       drawString5x7(screenWidth/2-16,115,winner,COLOR_BLACK,COLOR_GOLD);
-
+      
       while(1){}
     }
     u_int switches = p2sw_read(), i;    //getting input from players with switches

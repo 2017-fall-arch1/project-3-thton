@@ -1,6 +1,6 @@
 #include <msp430.h>
-#include <music.h>
-#include <buzzer.h>
+#include "music.h"
+#include "buzzer.h"
 
 void song(short sound){
   unsigned short level = THIRTY_SECOND_NOTE;
