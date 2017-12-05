@@ -300,8 +300,8 @@ void wdt_c_handler()
     }
   }
 
-  //if(!gameOver)
-    //song(sound);
+  if(!gameOver)
+    song(sound);
     //drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
 
   if(++sound > 225)
