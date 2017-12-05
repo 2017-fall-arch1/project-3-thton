@@ -70,7 +70,7 @@ changeScore:
 	add.b #1,&p2Score
 	mov &p2Stats,r12
 	mov.b &p2Score,3[r12]
-	mov #1,r13
+	mov #104,r13
 	call #printScore
 	jmp end
 
