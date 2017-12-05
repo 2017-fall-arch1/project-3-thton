@@ -5,7 +5,8 @@ This is a regular game of pong with two players, Red(P1) and Blue(P2)
 The game is played with four switches
 - A score is kept for each player P1(Red) and P2(Blue)
 - There is a 3 second count down at the start of each round
-- A sound is played everytime a player scores
+- A song is played while the game is going on
+- When a player wins the msp430 will beep for a second indicating the game is over
 
 ## Controls
 
