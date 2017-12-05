@@ -35,7 +35,7 @@ Layer layer4 = {
   
 
 Layer layer3 = {		/**< Layer with a black circle */
-  (AbShape *)&circle8,
+  (AbShape *)&circle4,
   {(screenWidth/2), (screenHeight/2)}, /* center */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLACK,
@@ -53,7 +53,7 @@ Layer fieldLayer = {		/* playing field as a layer */
 
 Layer layer1 = {		/**< Layer with a red paddle */
   (AbShape *)&paddle,
-  {screenWidth/2, screenHeight-10}, /* buttom (player 1) */
+  {screenWidth/2, screenHeight-15}, /* buttom (player 1) */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_RED,
   &fieldLayer,
@@ -61,7 +61,7 @@ Layer layer1 = {		/**< Layer with a red paddle */
 
 Layer layer0 = {		/**< Layer with a blue paddle */
   (AbShape *)&paddle,
-  {(screenWidth/2)+10, 10}, /* top (player 2) */
+  {(screenWidth/2), 15}, /* top (player 2) */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLUE,
   &layer1,
@@ -155,7 +155,7 @@ char p2Score = 0;
 char playGame = 0;
 char gameOver = 0;
 
-u_int bgColor = COLOR_GREEN;     /**< The background color */
+u_int bgColor = COLOR_YELLOW;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
 
 Region fieldFence;		/**< fence around playing field  */
@@ -167,11 +167,11 @@ void printScore(char *scoreBoard, char width){
   drawString5x7(width,3, scoreBoard, COLOR_BLACK, COLOR_YELLOW);
 }
 
-void resetPositions(MovLayer *m1, MovLayer *p1, MovLayer *p2){
+void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){
   Vec2 newPos;
   newPos.axes[0] = screenWidth/2;
   newPos.axes[1] = screenHeight/2;
-  m1->layer->posNext = newPos;
+  ml->layer->posNext = newPos;
   newPos.axes[1] = 10;
   p1->layer->posNext = newPos;
   newPos.axes[1] = (screenHeight-10);
@@ -191,6 +191,16 @@ void updateScore(int player){
   }
 }
 
+char game(MovLayer *ml, MovLayer *p1, MovLayer *p2, Region *fenceP1,Region *fenceP2, Region *fence)
+{
+  Vec2 newPos;
+  u_char axis;
+  Region shapeBoundary;
+
+  /*collision between ball and paddles*/
+  vec2Add(&newPos, &ml->layer->posNext, &ml->velocity);
+  abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
+}
 
 
 /** Initializes everything, enables interrupts and green LED, 
@@ -206,7 +216,7 @@ void main()
   shapeInit();
   p2sw_init(1);
 
-  shapeInit();
+  // shapeInit();
 
   layerInit(&layer0);
   layerDraw(&layer0);
