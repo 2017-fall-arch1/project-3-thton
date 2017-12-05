@@ -155,7 +155,7 @@ char p2Score = 0;
 char playGame = 0;
 char gameOver = 0;
 
-u_int bgColor = COLOR_YELLOW;     /**< The background color */
+u_int bgColor = COLOR_BLACK;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
 
 Region fieldFence;		/**< fence around playing field  */
@@ -244,7 +244,7 @@ void main()
   configureClocks();
   lcd_init();
   shapeInit();
-  p2sw_init(1);
+  //p2sw_init(1);
 
   // shapeInit();
 
@@ -266,7 +266,7 @@ void main()
     }
     P1OUT |= GREEN_LED;       /**< Green led on when CPU on */
     redrawScreen = 0;
-    movLayerDraw(&ml0, &layer0);
+    //movLayerDraw(&ml0, &layer0);
   }
 }
 
@@ -274,7 +274,44 @@ void main()
 void wdt_c_handler()
 {
   static short count = 0;
+  static short sound = 0;
+  static char point = 0;
+  static long wait = 0;
+  static char increment = 0;
+  u_char width = 60;
+  
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
+
+  while(!playGame){
+    drawString5x7(screenWidth/2-30,20, "PONG PONG", COLOR_GOLD, COLOR_BLACK); //title
+    drawString5x7(10,50,"S1: Red Left", COLOR_WHITE, COLOR_BLACK);
+    drawString5x7(10,65,"S2: Red Right", COLOR_GREEN, COLOR_BLACK);
+    drawString5x7(10,80,"S3: Blue Left", COLOR_RED, COLOR_BLACK);
+    drawString5x7(10,95,"S4: Blue Right",COLOR_ORANGE, COLOR_BLACK);
+    drawString5x7(10,115,"Press to Play!", COLOR_HOT_PINK, COLOR_BLACK);
+    if(++wait == 150){
+      wait = 0;
+      playGame = 1;
+      bgColor = COLOR_GREEN;
+
+      lcd_init();
+      p2sw_init(15);
+      //buzzer_init();
+      layerDraw(&layer0);
+
+      drawString5x7(50,3, "Score", COLOR_BLACK, COLOR_YELLOW);
+      printScore(p1Stats, 1);
+      printScore(p2Stats, 104);
+    }
+  }
+
+  if(!gameOver)
+    //song(sound);
+    drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
+
+  
+  
+  
   count ++;
   if (count == 15) {
     mlAdvance(&ml0, &fieldFence);
