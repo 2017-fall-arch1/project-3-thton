@@ -2,12 +2,6 @@
 #define  music_included
 
 void song(short sound);
-void play(long note, long tempo);
-void playlist(char song);
-void play_c_scale();
-void play_kh_theme();
-void play_ff_fanfare();
-void play_ff_chocobo();
 
 #define QUARTER_NOTE 100
 #define WHOLE_NOTE (QUARTER_NOTE*4)          /* time spent playing one note */
