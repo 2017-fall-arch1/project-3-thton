@@ -178,6 +178,19 @@ void resetPositions(MovLayer *m1, MovLayer *p1, MovLayer *p2){
   p2->layer->posNext = newPos;
 }
 
+void updateScore(int player){
+  if(player == 0){
+    p1Score++;
+    p1Stats[scoreAt] = '0'+p1Score;
+    printScore(p1Stats, 1);
+  }
+  else{
+    p2Score++;
+    p2Stats[scoreAt] = '0'+p2Score;
+    printScore(p2Stats, 104);
+  }
+}
+
 
 
 /** Initializes everything, enables interrupts and green LED, 
