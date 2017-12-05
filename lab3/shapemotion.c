@@ -162,9 +162,23 @@ Region fieldFence;		/**< fence around playing field  */
 Region fencePaddle1;
 Region fencePaddle2;
 
+/*Printing the score of a player */
 void printScore(char *scoreBoard, char width){
   drawString5x7(width,3, scoreBoard, COLOR_BLACK, COLOR_YELLOW);
 }
+
+void resetPositions(MovLayer *m1, MovLayer *p1, MovLayer *p2){
+  Vec2 newPos;
+  newPos.axes[0] = screenWidth/2;
+  newPos.axes[1] = screenHeight/2;
+  m1->layer->posNext = newPos;
+  newPos.axes[1] = 10;
+  p1->layer->posNext = newPos;
+  newPos.axes[1] = (screenHeight-10);
+  p2->layer->posNext = newPos;
+}
+
+
 
 /** Initializes everything, enables interrupts and green LED, 
  *  and handles the rendering for the screen
