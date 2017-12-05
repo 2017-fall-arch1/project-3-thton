@@ -1,10 +1,9 @@
-/** \file shapemotion.c
- *  \brief This is a simple shape motion demo.
- *  This demo creates two layers containing shapes.
- *  One layer contains a rectangle and the other a circle.
- *  While the CPU is running the green LED is on, and
- *  when the screen does not need to be redrawn the CPU
- *  is turned off along with the green LED.
+/* Course : Computer Architecture Fall 2017
+ * Professor : Dr. Eric Freudenthal
+ * Assignment : Lab 3
+ * Title : Game of Pong
+ * Author : Toan Ton
+ * Date : 12/5/2017
  */  
 #include <msp430.h>
 #include <libTimer.h>
@@ -42,8 +41,8 @@ Layer fieldLayer = {		/* playing field as a layer */
 };
 
 Layer layer3 = {
-  (AbShape *)&circle4,
-  {(screenWidth/2), (screenHeight/2)},
+  (AbShape *)&circle4,         /* pong ball */
+  {(screenWidth/2), (screenHeight/2)},   /* center */
   {0,0}, {0,0},
   COLOR_BLACK,
   &fieldLayer,
@@ -145,7 +144,7 @@ void mlAdvance(MovLayer *ml, Region *fence)
   } /**< for ml */
 }
 
-char p1Stats[6] = "P1:0";
+char p1Stats[6] = "P1:0";  /* Variables for score keeping and managing game */
 char p2Stats[6] = "P2:0";
 u_int scoreAt = 3;
 char p1Score = 0;
@@ -165,7 +164,7 @@ void printScore(char *scoreBoard, char width){
   drawString5x7(width,2, scoreBoard, COLOR_BLACK, COLOR_GREEN);
 }
 
-void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){
+void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){   /* resetting position of paddles and ball after each score  */
   Vec2 newPos;
   newPos.axes[0] = screenWidth/2;
   newPos.axes[1] = screenHeight/2;
@@ -176,7 +175,7 @@ void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){
   p2->layer->posNext = newPos;
 }
 
-void updateScore(int player){
+void updateScore(int player){          /* function for updating the score for a player  */
   if(player == 0){
     p1Score++;
     p1Stats[scoreAt] = '0'+p1Score;
@@ -246,9 +245,7 @@ void main()
   layerInit(&layer0);
   layerDraw(&layer0);
 
-
   layerGetBounds(&fieldLayer, &fieldFence);
-
 
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
@@ -261,14 +258,13 @@ void main()
     }
     P1OUT |= GREEN_LED;       /**< Green led on when CPU on */
     redrawScreen = 0;
-    //movLayerDraw(&ml0, &layer0);
   }
 }
 
 /** Watchdog timer interrupt handler. 15 interrupts/sec */
 void wdt_c_handler()
 {
-  static short count = 0;
+  static short count = 0;    /* variables for managing game */
   static short sound = 0;
   static char point = 0;
   static long wait = 0;
@@ -278,13 +274,13 @@ void wdt_c_handler()
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
 
   while(!playGame){
-    drawString5x7(screenWidth/2-15,30, "PONG", COLOR_GOLD, COLOR_BLACK); //title
-    drawString5x7(10,50,"S1: Red Left", COLOR_WHITE, COLOR_BLACK);
-    drawString5x7(10,65,"S2: Red Right", COLOR_GREEN, COLOR_BLACK);
-    drawString5x7(10,80,"S3: Blue Left", COLOR_RED, COLOR_BLACK);
-    drawString5x7(10,95,"S4: Blue Right",COLOR_ORANGE, COLOR_BLACK);
-    drawString5x7(10,115,"Press to Play!", COLOR_HOT_PINK, COLOR_BLACK);
-    if(++wait == 150){
+    drawString5x7(screenWidth/2-12,30, "PONG", COLOR_GOLD, COLOR_BLACK); //title
+    drawString5x7(10,50,"S1: Red Left", COLOR_RED, COLOR_BLACK);  //instructions for the game
+    drawString5x7(10,65,"S2: Red Right", COLOR_RED, COLOR_BLACK);
+    drawString5x7(10,80,"S3: Blue Left", COLOR_BLUE, COLOR_BLACK);
+    drawString5x7(10,95,"S4: Blue Right",COLOR_BLUE, COLOR_BLACK);
+    drawString5x7(10,115,"Press to Play!", COLOR_YELLOW, COLOR_BLACK);
+    if(++wait == 150){    //giving time for player to read instructions
       wait = 0;
       playGame = 1;
       bgColor = COLOR_GREEN;
@@ -313,7 +309,7 @@ void wdt_c_handler()
 
     movLayerDraw(&ml3,&layer3); //moving ball
 
-    point = game(&ml3, &ml1, &ml0, &fencePaddle1, &fencePaddle2, &fieldFence);
+    point = game(&ml3, &ml1, &ml0, &fencePaddle1, &fencePaddle2, &fieldFence); //start game
 
     if(point){
       resetPositions(&ml3, &ml1, &ml0);  //reset positions after score
@@ -321,7 +317,7 @@ void wdt_c_handler()
       movLayerDraw(&ml1,&layer1);
       movLayerDraw(&ml0,&layer0);
       if(((p1Score != 5) || (p2Score !=5)) && ((p1Score != 5) && (p2Score !=5))){
-	drawChar5x7(screenWidth/2-2,50,'3', COLOR_BLACK,COLOR_GREEN);
+	drawChar5x7(screenWidth/2-2,50,'3', COLOR_BLACK,COLOR_GREEN);    //3 second countdown for players
 	while(++wait < 1000000){}
 	drawChar5x7(screenWidth/2-2,50,'2', COLOR_BLACK,COLOR_GREEN);
 	while(++wait < 2000000){}
@@ -334,7 +330,7 @@ void wdt_c_handler()
     }
 
 
-    if(p1Score == 5 || p2Score == 5){
+    if(p1Score == 5 || p2Score == 5){     // win check for 5 rounds
       gameOver = 1;
       char *winner;
       (p1Score == 5)?(winner = "Red!"):(winner = "Blue!");
@@ -344,13 +340,13 @@ void wdt_c_handler()
       and_sr(~8);
       //buzzer_set_note(1);
 
-      drawString5x7(screenWidth/2-25,50,"GAME OVER!",COLOR_RED,COLOR_GOLD);
+      drawString5x7(screenWidth/2-25,50,"GAME OVER!",COLOR_RED,COLOR_GOLD);    //game over message
       drawString5x7(screenWidth/2-20,100,"WINNER",COLOR_BLACK,COLOR_GOLD);
       drawString5x7(screenWidth/2-16,115,winner,COLOR_BLACK,COLOR_GOLD);
 
       while(1){}
     }
-    u_int switches = p2sw_read(), i;
+    u_int switches = p2sw_read(), i;    //getting input from players with switches
     for(i=0; i<4; i++){
       if(!(switches & (1<<i))){
 	if(i == 0){    //switch one makes red go left
