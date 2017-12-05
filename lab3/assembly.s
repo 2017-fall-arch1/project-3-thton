@@ -1,6 +1,6 @@
 	.file	"assembly.c"
 	.text
-	.global updateScore
+	.global changeScore
 
 	.extern p1Score
 	.extern p2Score
@@ -11,24 +11,23 @@
 
 	.data
 
-updateScore:
+changeScore:
 	cmp #0,r12
 	jz player1Score
 	add.b #1,&p2Score
-	mov.b &p2Score,3[p2Stats]
 	mov &p2Stats,r12
+	mov.b &p2Score,3[r12]
 	mov #1,r13
 	call #printScore
 	jmp end
 
 player1Score:
 	add.b #1,&p1Score
-	mov.b &p1Score,3[p1Stats]
 	mov &p1Stats,r12
+	mov.b &p1Score,3[r12]
 	mov #1,r13
 	call #printScore
 	jmp end
 
 end:
 	ret
-	
