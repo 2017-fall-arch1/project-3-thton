@@ -2,7 +2,7 @@
 .text
 	.balign 2
 	.global	WDT
-	.global updateScore
+	.global changeScore
 	.section	__interrupt_vector_11,"ax",@progbits
 	.word	WDT
 	.text
@@ -64,20 +64,20 @@ ball_no_move:
 	.comm	count,1,1
 	.ident	"GCC: (GNU) 4.9.1 20140707 (prerelease (msp430-14r1-364)) (GNUPro 14r1) (Based on: GCC 4.8 GDB 7.7 Binutils 2.24 Newlib 2.1)"
 
-updateScore:
+changeScore:
 	cmp #0,r12
 	jz player1Score
 	add.b #1,&p2Score
-	mov.b &p2Score,3[p2Stats]
 	mov &p2Stats,r12
+	mov.b &p2Score,3[r12]
 	mov #1,r13
 	call #printScore
 	jmp end
 
 player1Score:
 	add.b #1,&p1Score
-	mov.b &p1Score,3[p1Stats]
 	mov &p1Stats,r12
+	mov.b &p1Score,3[r12]
 	mov #1,r13
 	call #printScore
 	jmp end

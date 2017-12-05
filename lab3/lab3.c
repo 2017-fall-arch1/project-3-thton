@@ -14,7 +14,6 @@
 #include <abCircle.h>
 #include "music.h"
 #include "buzzer.h"
-#include "assembly.s"
 
 #define GREEN_LED BIT6
 
@@ -178,7 +177,7 @@ void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){   /* resetting po
   p2->layer->posNext = newPos;
 }
 
-/*void updateScore(int player){          // function for updating the score for a player  
+void updateScore(int player){          // function for updating the score for a player  
   if(player == 0){
     p1Score++;
     p1Stats[scoreAt] = '0'+p1Score;
@@ -189,7 +188,7 @@ void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){   /* resetting po
     p2Stats[scoreAt] = '0'+p2Score;
     printScore(p2Stats, 104);
   }
-}*/
+}
 
 char game(MovLayer *ml, MovLayer *p1, MovLayer *p2, Region *fenceP1,Region *fenceP2, Region *fence)
 {
@@ -301,8 +300,8 @@ void wdt_c_handler()
     }
   }
 
-  //if(!gameOver)
-    // song(sound);
+  if(!gameOver)
+    song(sound);
     //drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
 
   if(++sound > 225)
