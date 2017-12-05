@@ -27,7 +27,7 @@ AbRectOutline fieldOutline = {	/* playing field */
 
 Layer layer4 = {
   (AbShape *)&rightArrow,
-  {(screenWidth/2)+10, (screenHeight/2)}, /**< bit below & right of center*/
+  {(screenWidth/2), (screenHeight/2)}, /**< bit below & right of center*/
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLACK,
   0
@@ -200,6 +200,36 @@ char game(MovLayer *ml, MovLayer *p1, MovLayer *p2, Region *fenceP1,Region *fenc
   /*collision between ball and paddles*/
   vec2Add(&newPos, &ml->layer->posNext, &ml->velocity);
   abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
+  if (((shapeBoundary.topLeft.axes[1] <= fenceP2->botRight.axes[1]) &&
+       (shapeBoundary.topLeft.axes[0] > fenceP2->topLeft.axes[0]) &&
+       (shapeBoundary.topLeft.axes[0] < fenceP2->botRight.axes[0])) ||
+      ((shapeBoundary.botRight.axes[1] >= fenceP1->topLeft.axes[1]) &&
+       (shapeBoundary.botRight.axes[0] > fenceP1->topLeft.axes[0]) &&
+       (shapeBoundary.botRight.axes[0] < fenceP1->botRight.axes[0]))){
+    int velocity = ml->velocity.axes[1] = -ml->velocity.axes[1];
+    newPos.axes[1] += (2*velocity);
+  }
+
+  /* collisions between ball and vertical walls */
+  if((shapeBoundary.topLeft.axes[0] <= fence->topLeft.axes[0]) ||
+     (shapeBoundary.botRight.axes[0] >= fence->botRight.axes[0])){
+    int velocity = ml->velocity.axes[0] = -ml->velocity.axes[0];
+    newPos.axes[0] += (2*velocity);
+  }
+
+  /* collision between ball and horizontal wall (scoring) */
+  if(shapeBoundary.topLeft.axes[1] < fence->topLeft.axes[1]){
+    updateScore(0);
+    return 1;
+  }
+
+  if(shapeBoundary.botRight.axes[1] > fence->botRight.axes[1]){
+    updateScore(1);
+    return 1;
+  }
+
+  ml->layer->posNext = newPos; //update posNext
+  return 0;
 }
 
 
