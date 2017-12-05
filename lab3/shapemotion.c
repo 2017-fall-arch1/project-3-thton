@@ -30,17 +30,17 @@ Layer layer4 = {
   {(screenWidth/2), (screenHeight/2)}, /**< bit below & right of center*/
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLACK,
-  0
+  0,
 };
   
 
-Layer layer3 = {		/**< Layer with a black circle */
+/*Layer layer3 = {		// Layer with a black circle 
   (AbShape *)&circle4,
-  {(screenWidth/2), (screenHeight/2)}, /* center */
-  {0,0}, {0,0},				    /* last & next pos */
+  {(screenWidth/2), (screenHeight/2)}, // center 
+{0,0}, {0,0},				    // last & next pos 
   COLOR_BLACK,
-  &layer4,
-};
+  &fieldLayer,
+};*/
 
 
 Layer fieldLayer = {		/* playing field as a layer */
@@ -48,7 +48,15 @@ Layer fieldLayer = {		/* playing field as a layer */
   {screenWidth/2, screenHeight/2},/**< center */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_BLACK,
-  &layer3
+  0,
+};
+
+Layer layer3 = {
+  (AbShape *)&circle4,
+  {(screenWidth/2), (screenHeight/2)},
+  {0,0}, {0,0},
+  COLOR_BLACK,
+  &fieldLayer,
 };
 
 Layer layer1 = {		/**< Layer with a red paddle */
@@ -56,7 +64,7 @@ Layer layer1 = {		/**< Layer with a red paddle */
   {screenWidth/2, screenHeight-15}, /* buttom (player 1) */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_RED,
-  &fieldLayer,
+  &layer3,
 };
 
 Layer layer0 = {		/**< Layer with a blue paddle */
@@ -79,8 +87,8 @@ typedef struct MovLayer_s {
 
 /* initial value of {0,0} will be overwritten */
 MovLayer ml3 = { &layer3, {3,3}, 0 }; /**< not all layers move */
-MovLayer ml1 = { &layer1, {3,0}, &ml3 }; //Red player bar 
-MovLayer ml0 = { &layer0, {3,0}, &ml1 }; //Blue player bar
+MovLayer ml1 = { &layer1, {3,0}, 0 }; //Red player bar 
+MovLayer ml0 = { &layer0, {3,0}, 0 }; //Blue player bar
 
 void movLayerDraw(MovLayer *movLayers, Layer *layers)
 {
@@ -164,7 +172,7 @@ Region fencePaddle2;
 
 /*Printing the score of a player */
 void printScore(char *scoreBoard, char width){
-  drawString5x7(width,3, scoreBoard, COLOR_BLACK, COLOR_YELLOW);
+  drawString5x7(width,3, scoreBoard, COLOR_BLACK, COLOR_GREEN);
 }
 
 void resetPositions(MovLayer *ml, MovLayer *p1, MovLayer *p2){
@@ -246,7 +254,7 @@ void main()
   shapeInit();
   //p2sw_init(1);
 
-  // shapeInit();
+  //shapeInit();
 
   layerInit(&layer0);
   layerDraw(&layer0);
@@ -283,7 +291,7 @@ void wdt_c_handler()
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
 
   while(!playGame){
-    drawString5x7(screenWidth/2-30,20, "PONG PONG", COLOR_GOLD, COLOR_BLACK); //title
+    drawString5x7(screenWidth/2-30,20, "PONG", COLOR_GOLD, COLOR_BLACK); //title
     drawString5x7(10,50,"S1: Red Left", COLOR_WHITE, COLOR_BLACK);
     drawString5x7(10,65,"S2: Red Right", COLOR_GREEN, COLOR_BLACK);
     drawString5x7(10,80,"S3: Blue Left", COLOR_RED, COLOR_BLACK);
@@ -299,25 +307,97 @@ void wdt_c_handler()
       //buzzer_init();
       layerDraw(&layer0);
 
-      drawString5x7(50,3, "Score", COLOR_BLACK, COLOR_YELLOW);
+      drawString5x7(50,3, "Score", COLOR_BLACK, COLOR_GREEN);
       printScore(p1Stats, 1);
       printScore(p2Stats, 104);
     }
   }
 
-  if(!gameOver)
+  //if(!gameOver)
     //song(sound);
-    drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
+    //drawString5x7(screenWidth/2-20, screenHeight-8,"Playing", COLOR_RED, COLOR_GREEN);
 
-  
-  
-  
-  count ++;
-  if (count == 15) {
+  /*if(++sound > 225)
+    sound = 0;
+  */
+  if(count++ == 15){
+    layerGetBounds(&layer1, &fencePaddle1);
+    layerGetBounds(&layer0, &fencePaddle2);
+
+    movLayerDraw(&ml3,&layer3); //moving ball
+
+    point = game(&ml3, &ml1, &ml0, &fencePaddle1, &fencePaddle2, &fieldFence);
+
+    if(point){
+      resetPositions(&ml3, &ml1, &ml0);  //reset positions after score
+      movLayerDraw(&ml3,&layer3);
+      movLayerDraw(&ml1,&layer1);
+      movLayerDraw(&ml0,&layer0);
+      drawChar5x7(screenWidth/2,50,'3', COLOR_BLACK,COLOR_GREEN);
+      while(++wait < 1000000){}
+      drawChar5x7(screenWidth/2,50,'2', COLOR_BLACK,COLOR_GREEN);
+      while(++wait < 2000000){}
+      drawChar5x7(screenWidth/2,50,'1', COLOR_BLACK,COLOR_GREEN);
+      while(++wait < 3000000){}
+      drawChar5x7(screenWidth/2,50,'1', COLOR_GREEN,COLOR_GREEN); //clear countdown
+      point = 0;
+      wait = 0;
+    }
+
+
+    if(p1Score == 7 || p2Score == 7){
+      gameOver = 1;
+      char *winner;
+      (p1Score == 7)?(winner = "Red Wins!"):(winner = "Blue Wins!");
+      bgColor = COLOR_GOLD;
+
+      layerDraw(&layer0);
+      and_sr(~8);
+      //buzzer_set_note(1);
+
+      drawString5x7(screenWidth/2-30,50,"GAME OVER!",COLOR_RED,COLOR_GOLD);
+      drawString5x7(screenWidth/2-30,100,"WINNER:",COLOR_BLACK,COLOR_GOLD);
+      drawString5x7(screenWidth/2-30,115,winner,COLOR_BLACK,COLOR_GOLD);
+
+      while(1){}
+    }
+  //count ++;
+  /*if (count == 15) {
     mlAdvance(&ml0, &fieldFence);
     if (p2sw_read())
       redrawScreen = 1;
     count = 0;
-  } 
-  P1OUT &= ~GREEN_LED;		    /**< Green LED off when cpu off */
+  } */
+    u_int switches = p2sw_read(), i;
+    for(i=0; i<4; i++){
+      if(!(switches & (1<<i))){
+	if(i == 0){
+	  ml1.velocity.axes[0] = -4;
+	  movLayerDraw(&ml1,&layer1);
+	  mlAdvance(&ml1, &fieldFence);
+	  redrawScreen = 1;
+	}
+	if(i == 1){
+	  ml1.velocity.axes[0] = 4;
+	  movLayerDraw(&ml1,&layer1);
+	  mlAdvance(&ml1,&fieldFence);
+	  redrawScreen = 1;
+	}
+	if(i == 2){
+	  ml0.velocity.axes[0] = -4;
+	  movLayerDraw(&ml0,&layer0);
+	  mlAdvance(&ml0,&fieldFence);
+	  redrawScreen = 1;
+	}
+	if(i == 3){
+	  ml0.velocity.axes[0] = 4;
+	  movLayerDraw(&ml0,&layer0);
+	  mlAdvance(&ml0,&fieldFence);
+	  redrawScreen = 1;
+	}
+      }
+      count = 0;
+    }
+    P1OUT &= ~GREEN_LED;		    /**< Green LED off when cpu off */
+  }
 }
